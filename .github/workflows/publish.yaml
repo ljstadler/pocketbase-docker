@@ -27,4 +27,4 @@ jobs:
                   platforms: linux/amd64,linux/arm64
                   file: ./Dockerfile
                   push: true
-                  tags: ${{ secrets.DOCKERHUB_USERNAME }}/pocketbase-docker:latest
+                  tags: ${{ secrets.DOCKERHUB_USERNAME }}/pocketbase:latest
