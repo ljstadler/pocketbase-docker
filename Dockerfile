@@ -1,8 +1,8 @@
 FROM alpine:latest as download
 
 RUN apk add --no-cache curl jq unzip && \
-    if [ $(apk --print-arch) = "x86_64" ]; then curl https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.assets[].browser_download_url | select( endswith("linux_amd64.zip") )' | xargs wget -O pocketbase.zip; fi && \
-    if [ $(apk --print-arch) = "aarch64" ]; then curl https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.assets[].browser_download_url | select( endswith("linux_arm64.zip") )' | xargs wget -O pocketbase.zip; fi && \
+    if [ $(arch) = "x86_64" ]; then curl https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.assets[].browser_download_url | select( endswith("linux_amd64.zip") )' | xargs wget -O pocketbase.zip; fi && \
+    if [ $(arch) = "aarch64" ]; then curl https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.assets[].browser_download_url | select( endswith("linux_arm64.zip") )' | xargs wget -O pocketbase.zip; fi && \
     unzip pocketbase.zip
 
 FROM scratch
