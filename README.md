@@ -8,6 +8,21 @@
 
 ## Usage
 
+### Docker Compose
+
+```yaml
+services:
+    pocketbase:
+        container_name: pocketbase
+        image: ghcr.io/ljstadler/pocketbase-docker:latest
+        ports:
+            - 8090:8090
+        volumes:
+            - ./pb/data:/pocketbase/pb_data
 ```
-docker run -d --name pocketbase -p 8090:8090 -v ./pb/data:/pb_data -v ./pb/hooks:/pb_hooks -v ./pb/migrations:/pb_migrations -v ./pb/public:/pb_public ghcr.io/ljstadler/pocketbase-docker
+
+### Docker Run
+
+```bash
+docker run -d --name pocketbase -p 8090:8090 -v ./pb/data:/pocketbase/pb_data ghcr.io/ljstadler/pocketbase-docker
 ```

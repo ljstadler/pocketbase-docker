@@ -1,15 +1,19 @@
-FROM alpine:latest as download
+FROM alpine:latest AS download
 
-RUN apk add --no-cache -U ca-certificates jq unzip && \
-    if [ $(arch) = "x86_64" ]; then wget -qO- https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.assets[].browser_download_url | select( endswith("linux_amd64.zip") )' | xargs wget -O pocketbase.zip; fi && \
-    if [ $(arch) = "aarch64" ]; then wget -qO- https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.assets[].browser_download_url | select( endswith("linux_arm64.zip") )' | xargs wget -O pocketbase.zip; fi && \
-    unzip pocketbase.zip
+ARG TARGETOS
+ARG TARGETARCH
 
-FROM scratch
+RUN apk add --no-cache jq unzip && \
+    wget -qO- https://api.github.com/repos/pocketbase/pocketbase/releases/latest | \
+    jq --arg TARGETARCH "$TARGETARCH" --arg TARGETOS "$TARGETOS" -r '.assets[].browser_download_url | select( endswith($TARGETOS + "_" + $TARGETARCH + ".zip") )' | \
+    xargs wget -O pocketbase.zip && \
+    unzip pocketbase.zip -d /pocketbase
 
-COPY --from=download pocketbase pocketbase
+FROM gcr.io/distroless/static:nonroot
 
-COPY --from=download /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=download --chown=nonroot /pocketbase /pocketbase
+
+WORKDIR /pocketbase
 
 EXPOSE 8090
 
