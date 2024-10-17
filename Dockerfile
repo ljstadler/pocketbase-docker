@@ -9,9 +9,9 @@ RUN apk add --no-cache jq unzip && \
     xargs wget -O pocketbase.zip && \
     unzip pocketbase.zip -d /pocketbase
 
-FROM gcr.io/distroless/static:nonroot
+FROM gcr.io/distroless/static
 
-COPY --from=download --chown=nonroot /pocketbase /pocketbase
+COPY --from=download /pocketbase /pocketbase
 
 WORKDIR /pocketbase
 
