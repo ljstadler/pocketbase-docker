@@ -1,4 +1,4 @@
-name: publish
+name: Publish
 
 on:
     workflow_dispatch:
@@ -6,32 +6,31 @@ on:
         - cron: "0 */12 * * *"
 
 jobs:
-    check-version:
+    check:
         runs-on: ubuntu-latest
         outputs:
-            SHOULD_BUILD: ${{ steps.check-version.outputs.SHOULD_BUILD }}
-            TAG: ${{ steps.check-version.outputs.TAG }}
+            SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
+            TAG: ${{ steps.should_build.outputs.TAG }}
 
         steps:
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Check version
-              id: check-version
+            - name: Should build?
+              id: should_build
               run: |
-                  tag="$(wget -qO- https://api.github.com/repos/pocketbase/pocketbase/releases/latest | jq -r '.tag_name[1:]')"
-                  if [ "$tag" != "$PB_VERSION" ]; then
-                    gh variable set PB_VERSION -b $tag
-                    echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
-                    echo "TAG=$tag" >> $GITHUB_OUTPUT
+                  pb_tag=$(gh api repos/pocketbase/pocketbase/releases/latest -q ".tag_name[1:]")
+                  tag=$(gh api users/$GITHUB_REPOSITORY_OWNER/packages/container/pocketbase-docker/versions -q ".[0].metadata.container.tags.[0]")
+                  if [ "$pb_tag" != "$tag" ]; then
+                    echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
+                    echo "TAG=$pb_tag" >> $GITHUB_OUTPUT
                   fi
               env:
-                  GH_TOKEN: ${{ secrets.VAR_PAT }}
-                  PB_VERSION: ${{ vars.PB_VERSION }}
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     build-and-push-image:
-        needs: check-version
-        if: needs.check-version.outputs.SHOULD_BUILD == 'true'
+        needs: check
+        if: needs.check.outputs.SHOULD_BUILD == 1
         runs-on: ubuntu-latest
 
         permissions:
@@ -64,8 +63,8 @@ jobs:
                   push: true
                   provenance: false
                   build-args: |
-                      VERSION=${{ needs.check-version.outputs.TAG }}
-                  tags: ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ needs.check-version.outputs.TAG }}
+                      VERSION=${{ needs.check.outputs.TAG }}
+                  tags: ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ needs.check.outputs.TAG }}
 
             - name: ghcr.io cleanup
               uses: dataaxiom/ghcr-cleanup-action@v1

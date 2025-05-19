@@ -1,10 +1,6 @@
-<div align=center>
-
 # pocketbase-docker
 
-## [PocketBase](https://pocketbase.io) Docker image
-
-</div>
+## Docker image for [PocketBase](https://pocketbase.io)
 
 ## Usage
 
