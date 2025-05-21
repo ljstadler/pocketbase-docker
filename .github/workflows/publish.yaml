@@ -64,7 +64,9 @@ jobs:
                   provenance: false
                   build-args: |
                       VERSION=${{ needs.check.outputs.TAG }}
-                  tags: ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ needs.check.outputs.TAG }}
+                  tags: |
+                      ghcr.io/${{ github.repository }}:latest
+                      ghcr.io/${{ github.repository }}:${{ needs.check.outputs.TAG }}
 
             - name: ghcr.io cleanup
               uses: dataaxiom/ghcr-cleanup-action@v1
