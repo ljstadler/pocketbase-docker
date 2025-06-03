@@ -10,7 +10,7 @@ RUN unzip pb.zip -d /pb
 
 FROM gcr.io/distroless/static
 
-COPY --from=download /pb /pb
+COPY --from=download /pb/pocketbase /pb/pocketbase
 
 EXPOSE 8090
 
